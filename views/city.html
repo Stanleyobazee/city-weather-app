@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{city}} Weather</title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+  <div class="container">
+    <a class="back" href="/">← Back to all cities</a>
+
+    <div class="hero">
+      <h2>{{city}}</h2>
+      <div class="country">{{country}}</div>
+      <img src="https://openweathermap.org/img/wn/{{icon}}@2x.png" alt="{{condition}}"/>
+      <div class="temp">{{temp}}°C</div>
+      <div class="condition">{{condition}}</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="label">🌡 Feels Like</div><div class="value">{{feels_like}}°C</div></div>
+      <div class="stat"><div class="label">💧 Humidity</div><div class="value">{{humidity}}%</div></div>
+      <div class="stat"><div class="label">💨 Wind Speed</div><div class="value">{{wind}} m/s</div></div>
+      <div class="stat"><div class="label">🔵 Pressure</div><div class="value">{{pressure}} hPa</div></div>
+      <div class="stat"><div class="label">👁 Visibility</div><div class="value">{{visibility}} km</div></div>
+      <div class="stat"><div class="label">🌅 Sunrise</div><div class="value">{{sunrise}}</div></div>
+      <div class="stat"><div class="label">🌇 Sunset</div><div class="value">{{sunset}}</div></div>
+    </div>
+
+    <div class="forecast-section">
+      <h3>🌧 Rain Forecast — Next 24 Hours</h3>
+      <div class="forecast-grid">
+        {{forecast}}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

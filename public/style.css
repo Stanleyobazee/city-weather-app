@@ -1,0 +1,43 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; padding: 30px 20px; }
+h1 { text-align: center; margin-bottom: 24px; font-size: 2rem; color: #e0e0ff; }
+form { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+input { padding: 10px 16px; border-radius: 8px; border: none; font-size: 1rem; width: 280px; background: #16213e; color: #fff; outline: 1px solid #444; }
+button { padding: 10px 20px; border-radius: 8px; border: none; background: #0f3460; color: #fff; font-size: 1rem; cursor: pointer; }
+button:hover { background: #e94560; }
+a.back { display: inline-block; margin-bottom: 24px; color: #a0c4ff; text-decoration: none; font-size: 0.95rem; }
+a.back:hover { text-decoration: underline; }
+.error { text-align: center; color: #e94560; margin-top: 20px; }
+
+/* Homepage grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; max-width: 1100px; margin: 0 auto; }
+.card { background: #16213e; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; text-decoration: none; color: inherit; transition: transform 0.2s, box-shadow 0.2s; display: block; }
+.card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); border: 1px solid #a0c4ff44; }
+.card h2 { font-size: 1rem; color: #a0c4ff; }
+.card .country { font-size: 0.75rem; color: #888; margin-bottom: 4px; }
+.card img { width: 56px; }
+.card .temp { font-size: 1.8rem; font-weight: bold; color: #fff; }
+.card .condition { font-size: 0.8rem; color: #ccc; text-transform: capitalize; }
+.card .hint { font-size: 0.7rem; color: #555; margin-top: 8px; }
+
+/* City detail */
+.container { max-width: 800px; margin: 0 auto; }
+.hero { background: #16213e; border-radius: 16px; padding: 30px; text-align: center; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+.hero h2 { font-size: 2rem; color: #a0c4ff; }
+.hero .country { color: #888; margin-bottom: 8px; }
+.hero img { width: 80px; }
+.hero .temp { font-size: 3.5rem; font-weight: bold; }
+.hero .condition { font-size: 1.1rem; color: #ccc; text-transform: capitalize; margin-bottom: 16px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat { background: #16213e; border-radius: 10px; padding: 14px; text-align: center; }
+.stat .label { font-size: 0.75rem; color: #888; margin-bottom: 4px; }
+.stat .value { font-size: 1.1rem; font-weight: bold; color: #e0e0ff; }
+.forecast-section { background: #16213e; border-radius: 16px; padding: 20px; }
+.forecast-section h3 { color: #a0c4ff; margin-bottom: 16px; font-size: 1rem; }
+.forecast-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
+.fcard { background: #0f1b35; border-radius: 10px; padding: 10px; text-align: center; font-size: 0.78rem; color: #ccc; }
+.fcard img { width: 36px; }
+.fcard .ftime { color: #888; font-size: 0.7rem; }
+.fcard .ftemp { font-weight: bold; color: #fff; }
+.fcard .fpop { color: #60b4ff; font-weight: bold; }
+.fcard .fdesc { text-transform: capitalize; font-size: 0.68rem; color: #aaa; }

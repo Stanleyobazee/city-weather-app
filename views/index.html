@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>City Weather App</title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+  <h1>🌍 City Weather App</h1>
+  <form method="GET" action="/">
+    <input type="text" name="city" placeholder="Search any city worldwide..." value="{{search}}"/>
+    <button type="submit">Search</button>
+  </form>
+
+  {{backLink}}
+
+  <div class="grid">
+    {{cards}}
+  </div>
+
+  {{error}}
+</body>
+</html>
