@@ -80,7 +80,25 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build Docker image (local only)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/city-weather-app:latest
+
+      # ── Image Security Scan (Trivy) ────────────────────────────────────────
+      - name: Scan image for vulnerabilities – Trivy
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/city-weather-app:latest
+          format: table
+          exit-code: 0
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
