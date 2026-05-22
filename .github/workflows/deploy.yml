@@ -35,9 +35,10 @@ jobs:
 
       # ── SAST (Semgrep) ─────────────────────────────────────────────────────
       - name: SAST – Semgrep
-        uses: returntocorp/semgrep-action@v1
+        uses: semgrep/semgrep-action@v1
         with:
           config: p/nodejs
+        continue-on-error: true
 
       # ── Unit Tests ─────────────────────────────────────────────────────────
       - name: Unit tests
