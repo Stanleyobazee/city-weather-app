@@ -109,7 +109,7 @@ jobs:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
 
       - name: Wait for app to be ready
-        run: npx wait-on http://localhost:3000 --timeout 30000
+        run: npx --yes wait-on http://localhost:3000 --timeout 30000
 
       # ── End-to-End Tests ───────────────────────────────────────────────────
       - name: End-to-end tests
