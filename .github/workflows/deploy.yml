@@ -90,7 +90,7 @@ jobs:
 
       # ── Image Security Scan (Trivy) ────────────────────────────────────────
       - name: Scan image for vulnerabilities – Trivy
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: ${{ secrets.DOCKER_USERNAME }}/city-weather-app:latest
           format: table
