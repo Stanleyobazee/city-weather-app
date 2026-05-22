@@ -6,8 +6,66 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  test:
     runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Linting ────────────────────────────────────────────────────────────
+      - name: Lint
+        run: npm run lint
+
+      # ── Static Code Analysis (SonarCloud) ──────────────────────────────────
+      - name: Static code analysis
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # ── SAST (Semgrep) ─────────────────────────────────────────────────────
+      - name: SAST – Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/nodejs
+
+      # ── Unit Tests ─────────────────────────────────────────────────────────
+      - name: Unit tests
+        run: npm test
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+
+      # ── Integration Tests ──────────────────────────────────────────────────
+      - name: Integration tests
+        run: npm run test:integration
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+
+      # ── Code Coverage ──────────────────────────────────────────────────────
+      - name: Code coverage
+        run: npm run test:coverage
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: test
 
     steps:
       - name: Checkout code
@@ -26,6 +84,50 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/city-weather-app:latest
 
+  e2e-and-dast:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Start app for E2E / DAST ───────────────────────────────────────────
+      - name: Start app
+        run: npm start &
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+
+      - name: Wait for app to be ready
+        run: npx wait-on http://localhost:3000 --timeout 30000
+
+      # ── End-to-End Tests ───────────────────────────────────────────────────
+      - name: End-to-end tests
+        run: npm run test:e2e
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+
+      # ── DAST (OWASP ZAP) ───────────────────────────────────────────────────
+      - name: DAST – OWASP ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://localhost:3000'
+          fail_action: false
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: e2e-and-dast
+
+    steps:
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -41,4 +143,3 @@ jobs:
               --name city-weather-app \
               --restart always \
               ${{ secrets.DOCKER_USERNAME }}/city-weather-app:latest
-          

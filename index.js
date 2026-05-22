@@ -123,4 +123,5 @@ app.get("/city", async (req, res) => {
   res.send(html);
 });
 
-app.listen(PORT, () => console.log(`🌤 Weather app running at http://localhost:${PORT}`));
+const server = app.listen(PORT, () => console.log(`🌤 Weather app running at http://localhost:${PORT}`));
+module.exports = server;
