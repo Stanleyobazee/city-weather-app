@@ -4,6 +4,15 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.OPENWEATHER_API_KEY;
@@ -74,10 +83,10 @@ app.get("/", async (req, res) => {
     </a>`).join("");
 
   const html = readView("index.html")
-    .replace("{{search}}", search || "")
+    .replace("{{search}}", escapeHtml(search || ""))
     .replace("{{backLink}}", search && results.length ? `<div style="text-align:center"><a class="back" href="/">← Back to all cities</a></div>` : "")
     .replace("{{cards}}", cards)
-    .replace("{{error}}", errors.length ? `<p class="error">❌ Could not find: ${errors.join(", ")}</p>` : "");
+    .replace("{{error}}", errors.length ? `<p class="error">❌ Could not find: ${escapeHtml(errors.join(", "))}</p>` : "");
 
   res.send(html);
 });
@@ -91,7 +100,7 @@ app.get("/city", async (req, res) => {
   try { w = await getWeather(cityName); }
   catch {
     return res.send(`<!DOCTYPE html><html><body style="background:#1a1a2e;color:#eee;padding:40px;text-align:center">
-      <p style="color:#e94560">❌ Could not fetch weather for "${cityName}"</p>
+      <p style="color:#e94560">❌ Could not fetch weather for "${escapeHtml(cityName)}"</p>
       <a href="/" style="color:#a0c4ff">← Back</a></body></html>`);
   }
 
