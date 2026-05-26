@@ -26,6 +26,6 @@ test('city detail page loads for London', async () => {
 
 test('unknown city shows error message', async () => {
   const { status, body } = await get(`${BASE}/city?name=FakeCityXYZ`);
-  expect(status).toBe(200);
+  expect(status).toBe(404);
   expect(body).toContain('FakeCityXYZ');
 }, 15000);
