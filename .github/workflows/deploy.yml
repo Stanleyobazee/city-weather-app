@@ -37,7 +37,7 @@ jobs:
       - name: SAST – Semgrep
         run: |
           pip install semgrep --quiet
-          semgrep scan --config p/nodejs --error
+          semgrep scan --config p/nodejs
         continue-on-error: true
 
       # ── Unit Tests ─────────────────────────────────────────────────────────

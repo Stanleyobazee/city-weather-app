@@ -17,31 +17,24 @@ const mockForecast = {
   }),
 };
 
-// Re-require app after mocking so axios mock is in place
-let app;
-beforeAll(() => {
-  axios.get.mockResolvedValue({ data: mockWeather });
-  // app.listen is called on require; isolate with a fresh require
-  jest.resetModules();
-  axios.get
-    .mockResolvedValueOnce({ data: mockWeather })
-    .mockResolvedValueOnce({ data: mockForecast });
-  app = require('../../index');
+const app = require('../../index');
+
+beforeEach(() => {
+  axios.get.mockImplementation((url) => {
+    if (url.includes('forecast')) return Promise.resolve({ data: mockForecast });
+    return Promise.resolve({ data: mockWeather });
+  });
 });
 
 afterAll(() => app.close?.());
 
 test('GET / returns 200 and city cards', async () => {
-  axios.get.mockResolvedValue({ data: mockWeather })
-           .mockResolvedValueOnce({ data: mockForecast });
   const res = await request(app).get('/');
   expect(res.statusCode).toBe(200);
   expect(res.text).toContain('London');
 });
 
 test('GET /city?name=London returns 200 with weather details', async () => {
-  axios.get.mockResolvedValueOnce({ data: mockWeather })
-           .mockResolvedValueOnce({ data: mockForecast });
   const res = await request(app).get('/city?name=London');
   expect(res.statusCode).toBe(200);
   expect(res.text).toContain('London');
