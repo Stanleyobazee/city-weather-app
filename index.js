@@ -4,6 +4,27 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 
+const app = express();
+const PORT = process.env.PORT || 3000;
+const API_KEY = process.env.OPENWEATHER_API_KEY;
+const BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
+const FORECAST_URL = "https://api.openweathermap.org/data/2.5/forecast";
+
+const defaultCities = ["London", "New York", "Tokyo", "Lagos", "Sydney", "Paris", "Dubai", "Berlin", "Toronto", "Mumbai"];
+
+// Security headers
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Content-Security-Policy", "default-src 'self' https://openweathermap.org; style-src 'self' 'unsafe-inline'; img-src 'self' https://openweathermap.org data:");
+  res.setHeader("Permissions-Policy", "geolocation=(), microphone=()");
+  res.removeHeader("X-Powered-By");
+  next();
+});
+
+app.use(express.static(path.join(__dirname, "public")));
+
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, "&amp;")
@@ -13,18 +34,20 @@ function escapeHtml(str) {
     .replace(/'/g, "&#x27;");
 }
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-const API_KEY = process.env.OPENWEATHER_API_KEY;
-const BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
-const FORECAST_URL = "https://api.openweathermap.org/data/2.5/forecast";
-
-const defaultCities = ["London", "New York", "Tokyo", "Lagos", "Sydney", "Paris", "Dubai", "Berlin", "Toronto", "Mumbai"];
-
-app.use(express.static(path.join(__dirname, "public")));
-
 function readView(name) {
   return fs.readFileSync(path.join(__dirname, "views", name), "utf-8");
+}
+
+function buildForecastCards(forecast) {
+  return forecast.map(s => `
+    <div class="fcard">
+      <div class="ftime">${s.date}</div>
+      <div class="ftime">${s.time}</div>
+      <img src="https://openweathermap.org/img/wn/${s.icon}.png" alt="${escapeHtml(s.desc)}"/>
+      <div class="ftemp">${s.temp}°C</div>
+      <div class="fpop">🌧 ${s.rain}%</div>
+      <div class="fdesc">${escapeHtml(s.desc)}</div>
+    </div>`).join("");
 }
 
 async function getWeather(city) {
@@ -68,17 +91,17 @@ app.get("/", async (req, res) => {
   await Promise.all(
     citiesToFetch.map(async (city) => {
       try { results.push(await getWeather(city)); }
-      catch { errors.push(city); }
+      catch (err) { errors.push(city); console.error(err.message); }
     })
   );
 
   const cards = results.map(w => `
     <a class="card" href="/city?name=${encodeURIComponent(w.city)}">
-      <h2>${w.city}</h2>
-      <div class="country">${w.country}</div>
-      <img src="https://openweathermap.org/img/wn/${w.icon}@2x.png" alt="${w.condition}"/>
+      <h2>${escapeHtml(w.city)}</h2>
+      <div class="country">${escapeHtml(w.country)}</div>
+      <img src="https://openweathermap.org/img/wn/${w.icon}@2x.png" alt="${escapeHtml(w.condition)}"/>
       <div class="temp">${w.temp}°C</div>
-      <div class="condition">${w.condition}</div>
+      <div class="condition">${escapeHtml(w.condition)}</div>
       <div class="hint">Click for details</div>
     </a>`).join("");
 
@@ -98,27 +121,20 @@ app.get("/city", async (req, res) => {
 
   let w;
   try { w = await getWeather(cityName); }
-  catch {
-    return res.send(`<!DOCTYPE html><html><body style="background:#1a1a2e;color:#eee;padding:40px;text-align:center">
-      <p style="color:#e94560">❌ Could not fetch weather for "${escapeHtml(cityName)}"</p>
-      <a href="/" style="color:#a0c4ff">← Back</a></body></html>`);
+  catch (err) {
+    console.error(err.message);
+    return res.status(404).send(readView("index.html")
+      .replace("{{search}}", "")
+      .replace("{{backLink}}", "")
+      .replace("{{cards}}", "")
+      .replace("{{error}}", `<p class="error">❌ Could not fetch weather for "${escapeHtml(cityName)}"</p>`));
   }
 
-  const forecastCards = w.forecast.map(s => `
-    <div class="fcard">
-      <div class="ftime">${s.date}</div>
-      <div class="ftime">${s.time}</div>
-      <img src="https://openweathermap.org/img/wn/${s.icon}.png" alt="${s.desc}"/>
-      <div class="ftemp">${s.temp}°C</div>
-      <div class="fpop">🌧 ${s.rain}%</div>
-      <div class="fdesc">${s.desc}</div>
-    </div>`).join("");
-
   const html = readView("city.html")
-    .replace(/{{city}}/g, w.city)
-    .replace("{{country}}", w.country)
+    .replace(/{{city}}/g, escapeHtml(w.city))
+    .replace("{{country}}", escapeHtml(w.country))
     .replace("{{icon}}", w.icon)
-    .replace("{{condition}}", w.condition)
+    .replace("{{condition}}", escapeHtml(w.condition))
     .replace("{{temp}}", w.temp)
     .replace("{{feels_like}}", w.feels_like)
     .replace("{{humidity}}", w.humidity)
@@ -127,7 +143,7 @@ app.get("/city", async (req, res) => {
     .replace("{{visibility}}", w.visibility)
     .replace("{{sunrise}}", w.sunrise)
     .replace("{{sunset}}", w.sunset)
-    .replace("{{forecast}}", forecastCards);
+    .replace("{{forecast}}", buildForecastCards(w.forecast));
 
   res.send(html);
 });
