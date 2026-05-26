@@ -35,9 +35,9 @@ jobs:
 
       # ── SAST (Semgrep) ─────────────────────────────────────────────────────
       - name: SAST – Semgrep
-        uses: semgrep/semgrep-action@v1
-        with:
-          config: p/nodejs
+        run: |
+          pip install semgrep --quiet
+          semgrep scan --config p/nodejs --error
         continue-on-error: true
 
       # ── Unit Tests ─────────────────────────────────────────────────────────
